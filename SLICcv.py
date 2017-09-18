@@ -1,5 +1,5 @@
 import numpy as np
-import sys
+import sys,cv2
 
 class SLIC:
     def __init__(self, img, step, nc):
@@ -18,8 +18,8 @@ class SLIC:
             self.labimg = cv2.cvtColor(img, cv2.COLOR_BGR2LAB).astype(np.float64)
         except ImportError:
             self.labimg = np.copy(self.img)
-            for i in xrange(self.labimg.shape[0]):
-                for j in xrange(self.labimg.shape[1]):
+            for i in range(self.labimg.shape[0]):
+                for j in range(self.labimg.shape[1]):
                     rgb = self.labimg[i, j]
                     self.labimg[i, j] = self._rgb2lab(tuple(reversed(rgb)))
 
@@ -80,7 +80,7 @@ class SLIC:
         indnp = np.mgrid[0:self.height,0:self.width].swapaxes(0,2).swapaxes(0,1)
         for i in range(self.ITERATIONS):
             self.distances = self.FLT_MAX * np.ones(self.img.shape[:2])
-            for j in xrange(self.centers.shape[0]):
+            for j in range(self.centers.shape[0]):
                 xlow, xhigh = int(self.centers[j][3] - self.step), int(self.centers[j][3] + self.step)
                 ylow, yhigh = int(self.centers[j][4] - self.step), int(self.centers[j][4] + self.step)
 
@@ -107,7 +107,7 @@ class SLIC:
                 self.distances[ylow : yhigh, xlow : xhigh] = distanceCrop
                 self.clusters[ylow : yhigh, xlow : xhigh][idx] = j
 
-            for k in xrange(len(self.centers)):
+            for k in range(len(self.centers)):
                 idx = (self.clusters == k)
                 colornp = self.labimg[idx]
                 distnp = indnp[idx]
@@ -121,8 +121,8 @@ class SLIC:
         self.distances = self.FLT_MAX * np.ones(self.img.shape[:2])
 
         centers = []
-        for i in xrange(self.step, self.width - self.step/2, self.step):
-            for j in xrange(self.step, self.height - self.step/2, self.step):
+        for i in range(self.step, self.width - self.step/2, self.step):
+            for j in range(self.step, self.height - self.step/2, self.step):
                 
                 nc = self._findLocalMinimum(center=(i, j))
                 color = self.labimg[nc[1], nc[0]]
@@ -139,8 +139,8 @@ class SLIC:
         dy4 = [0, -1, 0, 1]
         new_clusters = -1 * np.ones(self.img.shape[:2]).astype(np.int64)
         elements = []
-        for i in xrange(self.width):
-            for j in xrange(self.height):
+        for i in range(self.width):
+            for j in range(self.height):
                 if new_clusters[j, i] == -1:
                     elements = []
                     elements.append((j, i))
@@ -178,8 +178,8 @@ class SLIC:
         isTaken = np.zeros(self.img.shape[:2], np.bool)
         contours = []
 
-        for i in xrange(self.width):
-            for j in xrange(self.height):
+        for i in range(self.width):
+            for j in range(self.height):
                 nr_p = 0
                 for dx, dy in zip(dx8, dy8):
                     x = i + dx
@@ -192,14 +192,14 @@ class SLIC:
                     isTaken[j, i] = True
                     contours.append([j, i])
 
-        for i in xrange(len(contours)):
+        for i in range(len(contours)):
             self.img[contours[i][0], contours[i][1]] = color
 
     def _findLocalMinimum(self, center):
         min_grad = self.FLT_MAX
         loc_min = center
-        for i in xrange(center[0] - 1, center[0] + 2):
-            for j in xrange(center[1] - 1, center[1] + 2):
+        for i in range(center[0] - 1, center[0] + 2):
+            for j in range(center[1] - 1, center[1] + 2):
                 c1 = self.labimg[j+1, i]
                 c2 = self.labimg[j, i+1]
                 c3 = self.labimg[j, i]
